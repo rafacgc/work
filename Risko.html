@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Calculadora de Risco Cardiovascular</title>
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.10.1/core.css" />
+    <script defer src="https://pyscript.net/releases/2024.10.1/core.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         label { display: block; margin: 10px 0 5px; }
@@ -63,5 +63,171 @@
 
     <div id="output"></div>
 
-    <py-script>
-from pyscript import Element
+    <script type="py" id="main-script">
+from pyscript import Element, document
+
+def age_opt(age):
+    age = int(age)
+    if 10 < age <= 20:
+        return '10 - 20 anos', 1
+    elif 20 < age <= 30:
+        return '21 - 30 anos', 2
+    elif 30 < age <= 40:
+        return '31 - 40 anos', 3
+    elif 40 < age <= 50:
+        return '41 - 50 anos', 4
+    elif 50 < age <= 60:
+        return '51 - 60 anos', 6
+    else:
+        return 'Acima de 60 anos', 8
+
+def fam_hist_opt(fam_hist):
+    if fam_hist == '0':
+        return 'Nenhuma história reconhecida', 1
+    elif fam_hist == '1':
+        return '1 parente com +60 anos com doença cardiovascular', 2
+    elif fam_hist == '2':
+        return '2 parentes com +60 anos com doença cardiovascular', 3
+    elif fam_hist == '3':
+        return '1 parente com -60 anos com doença cardiovascular', 4
+    elif fam_hist == '4':
+        return '2 parentes com -60 anos com doença cardiovascular', 6
+    else:
+        return '3 ou mais parentes com -60 anos', 8
+
+def weight_opt(high, weight):
+    weight_min = float(high) * float(high) * 18.5
+    weight_max = float(high) * float(high) * 25
+    weight = float(weight)
+    if weight < weight_min - 2.3:
+        return '+ de 2,3kg abaixo do peso padrão*', 0
+    elif weight_min - 2.3 < weight <= weight_max + 2.3:
+        return 'De -2,3kg a +2,3kg do peso padrão*', 1
+    elif weight_max + 2.3 < weight <= weight_max + 9:
+        return 'Excesso de peso padrão* de 2,4kg a 9kg', 2
+    elif weight_max + 9 < weight <= weight_max + 15.8:
+        return 'Excesso de peso padrão* de 9,1kg a 15,8kg', 3
+    elif weight_max + 15.8 < weight <= weight_max + 22.6:
+        return 'Excesso de peso padrão* de 15,9kg a 22,6kg', 5
+    else:
+        return 'Excesso de peso padrão* acima de 22,6kg', 7
+
+def smoke_opt(smoke):
+    smoke = int(smoke)
+    if smoke == 0:
+        return 'Não Fumante', 0
+    elif 0 < smoke <= 10:
+        return '10 cigarros ou menos por dia', 1
+    elif 10 < smoke <= 20:
+        return 'De 11 a 20 cigarros por dia', 2
+    elif 20 < smoke <= 30:
+        return 'De 21 a 30 cigarros por dia', 4
+    elif 30 < smoke <= 40:
+        return 'De 31 a 40 cigarros por dia', 6
+    else:
+        return 'Acima de 40 cigarros por dia', 10
+
+def fitness_opt(fitness):
+    if fitness == '5':
+        return 'Esforço Ocupacional e recreacional intenso', 1
+    elif fitness == '4':
+        return 'Esforço Ocupacional e recreacional moderado', 2
+    elif fitness == '3':
+        return 'Trabalho sedentário e esforço recreacional intenso', 3
+    elif fitness == '2':
+        return 'Trabalho sedentário e esforço recreacional moderado', 5
+    elif fitness == '1':
+        return 'Trabalho sedentário e esforço recreacional leve', 6
+    else:
+        return 'Ausência completa de qualquer exercício', 8
+
+def fat_diet_opt(fat):
+    fat = int(fat)
+   =20
+    if fat == 0:
+        return 'Ausência de gorduras animais ou sólidas na dieta', 1
+    elif fat <= 10:
+        return '10% de gordura animal ou sólida na dieta', 2
+    elif 10 < fat <= 20:
+        return '20% de gordura animal ou sólida na dieta', 3
+    elif 20 < fat <= 30:
+        return '30% de gordura animal ou sólida na dieta', 4
+    elif 30 < fat <= 40:
+        return '40% de gordura animal ou sólida na dieta', 5
+    else:
+        return '50% de gordura animal ou sólida na dieta', 7
+
+def pas_opt(pas):
+    pas = int(pas)
+    if pas < 120:
+        return 'Abaixo de 120 mmHg', 1
+    elif 120 <= pas < 140:
+        return 'De 120 a 139 mmHg', 2
+    elif 140 <= pas < 160:
+        return 'De 140 a 159 mmHg', 3
+    elif 160 <= pas < 180:
+        return 'De 160 a 179 mmHg', 4
+    elif 180 <= pas < 200:
+        return 'De 180 a 199 mmHg', 6
+    else:
+        return 'Acima de 200 mmHg', 8
+
+def pad_opt(pad):
+    pad = int(pad)
+    if pad < 70:
+        return 'Abaixo de 70 mmHg', 1
+    elif 70 <= pad < 77:
+        return 'De 71 a 76 mmHg', 2
+    elif 77 <= pad < 83:
+        return 'De 77 a 82 mmHg', 3
+    elif 83 <= pad < 94:
+        return 'De 83 a 93 mmHg', 5
+    elif 94 <= pad < 106:
+        return 'De 94 a 105 mmHg', 6
+    else:
+        return 'Acima de 106 mmHg', 8
+
+def registro(idade, hereditariedade, peso, altura, fumo, exercicio, gordura_dieta, pas, pad):
+    idade_result = age_opt(idade)
+    hereditariedade_result = fam_hist_opt(hereditariedade)
+    peso_result = weight_opt(altura, peso)
+    fumo_result = smoke_opt(fumo)
+    exercicio_result = fitness_opt(exercicio)
+    gordura_dieta_result = fat_diet_opt(gordura_dieta)
+    pas_result = pas_opt(pas)
+    pad_result = pad_opt(pad)
+    total = (idade_result[1] + hereditariedade_result[1] + peso_result[1] + fumo_result[1] +
+             exercicio_result[1] + gordura_dieta_result[1] + pas_result[1] + pad_result[1])
+    
+    output = (f"Idade: {idade_result[0]} - {idade_result[1]} pontos\n"
+              f"História Familiar: {hereditariedade_result[0]} - {hereditariedade_result[1]} pontos\n"
+              f"Peso: {peso_result[0]} - {peso_result[1]} pontos\n"
+              f"Fumo: {fumo_result[0]} - {fumo_result[1]} pontos\n"
+              f"Exercício: {exercicio_result[0]} - {exercicio_result[1]} pontos\n"
+              f"Gordura na Dieta: {gordura_dieta_result[0]} - {gordura_dieta_result[1]} pontos\n"
+              f"PAS: {pas_result[0]} - {pas_result[1]} pontos\n"
+              f"PAD: {pad_result[0]} - {pad_result[1]} pontos\n"
+              f"Total: {total} pontos")
+    return output
+
+def calcular(event):
+    try:
+        idade = Element("idade").value
+        hereditariedade = Element("hereditariedade").value
+        peso = Element("peso").value
+        altura = Element("altura").value
+        fumo = Element("fumo").value
+        exercicio = Element("exercicio").value
+        gordura_dieta = Element("gordura_dieta").value
+        pas = Element("pas").value
+        pad = Element("pad").value
+        
+        resultado = registro(idade, hereditariedade, peso, altura, fumo, exercicio, gordura_dieta, pas, pad)
+        Element("output").write(resultado)
+    except Exception as e:
+        Element("output").write(f"Erro: {str(e)}")
+
+document.getElementById("calcular-btn").addEventListener("click", calcular)
+    </script>
+</body>
+</html>
