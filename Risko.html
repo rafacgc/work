@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Risco Cardiovascular</title>
+    <link rel="stylesheet" href="pyscript.css" />
+    <script defer src="pyscript.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        label { display: block; margin: 10px 0 5px; }
+        input, select { margin-bottom: 10px; padding: 5px; }
+        #output { margin-top: 20px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Calculadora de Risco Cardiovascular</h1>
+    <form id="form">
+        <label>Qual a idade?</label>
+        <input type="number" id="idade" required>
+
+        <label>Qual a história familiar?</label>
+        <select id="hereditariedade" required>
+            <option value="0">Nenhuma história reconhecida</option>
+            <option value="1">1 parente com +60 anos com doença cardiovascular</option>
+            <option value="2">2 parentes com +60 anos com doença cardiovascular</option>
+            <option value="3">1 parente com -60 anos com doença cardiovascular</option>
+            <option value="4">2 parentes com -60 anos com doença cardiovascular</option>
+            <option value="5">3 ou mais parentes com -60 anos com doença cardiovascular</option>
+        </select>
+
+        <label>Qual o peso? (kg)</label>
+        <input type="number" id="peso" step="0.1" required>
+
+        <label>Qual a altura? (m)</label>
+        <input type="number" id="altura" step="0.01" required>
+
+        <label>Quantos cigarros por dia?</label>
+        <input type="number" id="fumo" required>
+
+        <label>Qual o nível de atividade física?</label>
+        <select id="exercicio" required>
+            <option value="5">Esforço ocupacional e recreacional intenso</option>
+            <option value="4">Esforço ocupacional e recreacional moderado</option>
+            <option value="3">Trabalho sedentário e esforço recreacional intenso</option>
+            <option value="2">Trabalho sedentário e esforço recreacional moderado</option>
+            <option value="1">Trabalho sedentário e esforço recreacional leve</option>
+            <option value="0">Ausência completa de qualquer exercício</option>
+        </select>
+
+        <label>Qual a porcentagem de gordura na dieta?</label>
+        <input type="number" id="gordura_dieta" required>
+
+        <label>Qual o valor de PAS? (mmHg)</label>
+        <input type="number" id="pas" required>
+
+        <label>Qual o valor de PAD? (mmHg)</label>
+        <input type="number" id="pad" required>
+
+        <button type="button" pys-onClick="calcular">Calcular</button>
+    </form>
+
+    <div id="output"></div>
+
+    <py-script>
+from browser import document
+
+# Funções do seu código Python
+def age_opt(age):
+    if int(age) > 10 and int(age) <= 20:
+        return '10 - 20 anos', 1
+    elif int(age) > 20 and int(age) <= 30:
+        return '21 - 30 anos', 2
+    elif int(age) > 30 and int(age) <= 40:
+        return '31 - 40 anos', 3
+    elif int(age) > 40 and int(age) <= 50:
+        return '41 - 50 anos', 4
+    elif int(age) > 50 and int(age) <= 60:
+        return '51 - 60 anos', 6
+    else:
+        return 'Acima de 60 anos', 8
+
+def fam_hist_opt(fam_hist):
+    if fam_hist == '0':
+        return 'Nenhuma história reconhecida', 1
+    elif fam_hist == '1':
+        return '1 parente com + de 60 anos com doença cardiovascular', 2
+    elif fam_hist == '2':
+        return '2 parentes com + de 60 anos com doença cardiovascular', 3
+    elif fam_hist == '3':
+        return '1 parente com - de 60 anos com doença cardiovascular', 4
+    elif fam_hist == '4':
+        return '2 parentes com - de 60 anos com doença cardiovascular', 6
+    else:
+        return '3 parentes com - de 60 anos com doença cardiovascular', 8
+
+def weight_opt(high, weight):
+    weight_min = float(high) * float(high) * 18.5  # Corrigido: high * high
+    weight_max = float(high) * float(high) * 25    # Corrigido: high * high
+    if float(weight) < weight_min - 2.3:
+        return '+ de 2,3kg abaixo do peso padrão*', 0
+    elif float(weight) > weight_min - 2.3 and float(weight) <= weight_max + 2.3:
+        return 'De -2,3kg a +2,3kg do peso padrão*', 1
+    elif float(weight) > weight_max + 2.3 and float(weight) <= weight_max + 9:
+        return 'excesso de peso padrão* de 2,4kg à 9kg', 2
+    elif float(weight) > weight_max + 9 and float(weight) <= weight_max + 15.8:
+        return 'excesso de peso padrão* de 9,1kg à 15,8kg', 3
+    elif float(weight) > weight_max + 15.8 and float(weight) <= weight_max + 22.6:
+        return 'excesso de peso padrão* de 15,9 kg à 22,6 kg', 5
+    else:
+        return 'excesso de peso padrão* acima de 22,6kg', 7
+
+def smoke_opt(smoke):
+    if int(smoke) == 0:
+        return 'Não Fumante', 0
+    elif int(smoke) > 0 and int(smoke) <= 10:
+        return '10 cigarros ou menos por dia', 1
+    elif int(smoke) > 10 and int(smoke) <= 20:
+        return 'De 11 à 20 cigarros por dia', 2
+    elif int(smoke) > 20 and int(smoke) <= 30:
+        return 'De 21 à 30 cigarros por dia', 4
+    elif int(smoke) > 30 and int(smoke) <= 40:
+        return 'De 31 à 40 cigarros por dia', 6
+    else:
+        return 'Acima de 40 cigarros por dia', 10
+
+def fitness_opt(fitness):
+    if fitness == '5':
+        return 'Esforço Ocupacional e recreacional intenso', 1
+    elif fitness == '4':
+        return 'Esforço Ocupacional e recreacional moderado', 2
+    elif fitness == '3':
+        return 'Trabalho sedentário e esforço recreacional intenso', 3
+    elif fitness == '2':
+        return 'Trabalho sedentário e esforço recreacional moderado', 5
+    elif fitness == '1':
+        return 'Trabalho sedentário e esforço recreacional leve', 6
+    else:
+        return 'Ausência completa de qualquer exercício', 8
+
+def fat_diet_opt(fat):
+    if int(fat) == 0:
+        return 'Ausência de gorduras animais ou sólidas na dieta', 1
+    elif int(fat) <= 10:
+        return '10% de gordura animal ou sólida na dieta', 2
+    elif int(fat) > 10 and int(fat) <= 20:
+        return '20% de gordura animal ou sólida na dieta', 3
+    elif int(fat) > 20 and int(fat) <= 30:
+        return '30% de gordura animal ou sólida na dieta', 4
+    elif int(fat) > 30 and int(fat) <= 40:
+        return '40% de gordura animal ou sólida na dieta', 5
+    else:
+        return '50% de gordura animal ou sólida na dieta', 7
+
+def pas_opt(pas):
+    if int(pas) < 120:
+        return 'Abaixo 120 mmHg', 1
+    elif int(pas) >= 120 and int(pas) < 140:
+        return 'De 120 a 139 mmHg', 2
+    elif int(pas) >= 140 and int(pas) < 160:
+        return 'De 140 a 159 mmHg', 3
+    elif int(pas) >= 160 and int(pas) < 180:
+        return 'De 160 a 179 mmHg', 4
+    elif int(pas) >= 180 and int(pas) < 200:
+        return 'De 180 a 199 mmHg', 6
+    else:
+        return 'Acima de 200 mmHg', 8
+
+def pad_opt(pad):
+    if int(pad) < 70:
+        return 'Abaixo 70 mmHg', 1
+    elif int(pad) >= 70 and int(pad) < 77:
+        return 'De 71 a 76 mmHg', 2
+    elif int(pad) >= 77 and int(pad) < 83:
+        return 'De 77 a 82 mmHg', 3
+    elif int(pad) >= 83 and int(pad) < 94:
+        return 'De 83 a 93 mmHg', 5
+    elif int(pad) >= 94 and int(pad) < 106:
+        return 'De 94 a 105 mmHg', 6
+    else:
+        return 'Acima de 106 mmHg', 8
+
+def registro(idade, hereditariedade, peso, altura, fumo, exercicio, gordura_dieta, pas, pad):
+    idade_result = age_opt(idade)
+    hereditariedade_result = fam_hist_opt(hereditariedade)
+    peso_result = weight_opt(altura, peso)
+    fumo_result = smoke_opt(fumo)
+    exercicio_result = fitness_opt(exercicio)
+    gordura_dieta_result = fat_diet_opt(gordura_dieta)
+    pas_result = pas_opt(pas)
+    pad_result = pad_opt(pad)
+    total = (idade_result[1] + hereditariedade_result[1] + peso_result[1] + fumo_result[1] +
+             exercicio_result[1] + gordura_dieta_result[1] + pas_result[1] + pad_result[1])
+    
+    output = (f"Idade: {idade_result[0]} - {idade_result[1]} pontos\n"
+              f"História Familiar: {hereditariedade_result[0]} - {hereditariedade_result[1]} pontos\n"
+              f"Peso: {peso_result[0]} - {peso_result[1]} pontos\n"
+              f"Fumo: {fumo_result[0]} - {fumo_result[1]} pontos\n"
+              f"Exercício: {exercicio_result[0]} - {exercicio_result[1]} pontos\n"
+              f"Gordura na Dieta: {gordura_dieta_result[0]} - {gordura_dieta_result[1]} pontos\n"
+              f"PAS: {pas_result[0]} - {pas_result[1]} pontos\n"
+              f"PAD: {pad_result[0]} - {pad_result[1]} pontos\n"
+              f"Total: {total} pontos")
+    return output
+
+# Função para capturar os dados do formulário e exibir o resultado
+def calcular(*args):
+    idade = document["idade"].value
+    hereditariedade = document["hereditariedade"].value
+    peso = document["peso"].value
+    altura = document["altura"].value
+    fumo = document["fumo"].value
+    exercicio = document["exercicio"].value
+    gordura_dieta = document["gordura_dieta"].value
+    pas = document["pas"].value
+    pad = document["pad"].value
+    
+    resultado = registro(idade, hereditariedade, peso, altura, fumo, exercicio, gordura_dieta, pas, pad)
+    document["output"].innerText = resultado
+    </py-script>
+</body>
+</html>
