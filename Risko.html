@@ -154,7 +154,7 @@ def fat_diet_opt(fat):
     elif 30 < fat <= 40:
         return '40% de gordura animal ou sólida na dieta', 5
     else:
-        return '50% de gordura animal ou sólida na dieta', 7
+       A return '50% de gordura animal ou sólida na dieta', 7
 
 def pas_opt(pas):
     pas = int(pas)
@@ -226,7 +226,16 @@ def calcular(event):
     except Exception as e:
         Element("output").write(f"Erro: {str(e)}")
 
+# Adiciona um log para verificar se o evento está sendo registrado
+print("Script Python carregado com sucesso!")
 document.getElementById("calcular-btn").addEventListener("click", calcular)
+    </script>
+
+    <!-- Script JavaScript para debug -->
+    <script>
+        document.getElementById("calcular-btn").addEventListener("click", function() {
+            console.log("Botão Calcular clicado!");
+        });
     </script>
 </body>
 </html>
